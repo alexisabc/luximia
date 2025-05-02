@@ -12,7 +12,7 @@ export const ProtectedRoute = ({ children, requiredRoles = [] }) => {
         if (!loading) {
             // Si no hay usuario, redirigir a login
             if (!currentUser) {
-                router.push('/login');
+                router.push('/');
             }
             // Si hay roles requeridos y el usuario no tiene ninguno, redirigir
             else if (requiredRoles.length > 0 && !requiredRoles.includes(currentUser.rol)) {

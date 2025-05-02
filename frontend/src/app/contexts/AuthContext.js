@@ -56,7 +56,13 @@ export function AuthProvider({ children }) {
         try {
             const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/usuarios/login/`,
-                { usuario, contrasena }
+                { usuario, contrasena },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',  // Añadir headers explícitos
+                        'Accept': 'application/json'
+                    }
+                }
             );
 
             if (response.data.user) {
