@@ -1,24 +1,25 @@
-const { app, BrowserWindow } = require('electron')
-const path = require('path')
+// electron/main.js
+const { app, BrowserWindow } = require('electron');
+const path = require('path');
 
 function createWindow() {
     const win = new BrowserWindow({
         width: 1200,
         height: 800,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
             contextIsolation: true
         }
-    })
+    });
 
-    // Carga el frontend en desarrollo/producción
+    // Modo desarrollo: carga Next.js (localhost:3000)
     if (process.env.NODE_ENV === 'development') {
-        win.loadURL('http://localhost:3000')
-        win.webContents.openDevTools()
+        win.loadURL('http://localhost:3000');
+        win.webContents.openDevTools(); // Opcional: abre DevTools
     } else {
-        win.loadFile(path.join(__dirname, 'build', 'index.html'))
+        // Modo producción: carga el build estático
+        win.loadFile(path.join(__dirname, '../frontend/out/index.html'));
     }
 }
 
-app.whenReady().then(createWindow)
+app.whenReady().then(createWindow);

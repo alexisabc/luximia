@@ -1,16 +1,22 @@
 {
   "name": "luximia",
   "version": "1.0.0",
+  "private": true,
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "dev": "NODE_ENV=development electron ."
+    "dev": "concurrently -k \"npm run dev:front\" \"npm run dev:back\" \"npm run dev:electron\"",
+    "dev:front": "cd ../frontend && npm run dev",
+    "dev:back": "cd ../backend && python manage.py runserver",
+    "dev:electron": "set NODE_ENV=development&& electron .",
+    "build:full": "cd ../frontend && npm run build && cd ../electron && npm run build"
   },
   "keywords": [],
   "author": "Alexis A.B.C.",
   "license": "ISC",
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "electron": "^31.7.7",
     "electron-builder": "^26.0.12",
     "electron-serve": "^2.1.1"
@@ -19,7 +25,11 @@
     "appId": "com.luximia.pos",
     "productName": "Luximia POS",
     "directories": {
-      "output": "build"
-    }
+      "output": "../release-builds"
+    },
+    "files": [
+      "**/*",
+      "../frontend/out/**/*"
+    ]
   }
 }
