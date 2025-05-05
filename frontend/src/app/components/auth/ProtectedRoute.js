@@ -32,5 +32,5 @@ export const ProtectedRoute = ({ children, requiredRoles = [] }) => {
     // Mostrar contenido solo si hay usuario y cumple con los roles requeridos
     return currentUser && (requiredRoles.length === 0 || requiredRoles.includes(currentUser.rol))
         ? children
-        : null;
+        : <div>Redirigiendo...</div>;
 };

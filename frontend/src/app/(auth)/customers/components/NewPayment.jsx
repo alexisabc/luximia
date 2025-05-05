@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../../contexts/AuthContext'; // Asegúrate de usar la ruta correcta
+import { useAuth } from '../../../contexts/AuthContext'; // Asegúrate de usar la ruta correcta
 
 const ALLOWED_PAYMENT_METHODS = {
     1: "EFECTIVO",
@@ -33,7 +33,7 @@ const NewPaymentModal = ({ isModalOpen, onClose, onPaymentAdded }) => {
     const [loadingClients, setLoadingClients] = useState(false);
     const [clientError, setClientError] = useState('');
     const inputRef = useRef(null);
- // Función para manejar cambios en el monto
+    // Función para manejar cambios en el monto
     const handleAmountChange = (value) => {
         const cursorPosition = inputRef.current?.selectionStart;
         const originalValue = formattedAmount;
@@ -121,7 +121,7 @@ const NewPaymentModal = ({ isModalOpen, onClose, onPaymentAdded }) => {
         }
 
         return Math.max(0, Math.min(adjustedPos, newValue.length));
-    };    const handleAmountFocus = (e) => {
+    }; const handleAmountFocus = (e) => {
         if (formattedAmount === '0.00') {
             setFormattedAmount('');
         }
@@ -326,156 +326,156 @@ const NewPaymentModal = ({ isModalOpen, onClose, onPaymentAdded }) => {
         }
     };
 
-return (
-    isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-md shadow-md w-11/12 md:w-2/3 lg:w-1/3">
-                <h3 className="text-lg font-semibold mb-4">Registrar Nuevo Abono</h3>
+    return (
+        isModalOpen && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="bg-white p-6 rounded-md shadow-md w-11/12 md:w-2/3 lg:w-1/3">
+                    <h3 className="text-lg font-semibold mb-4">Registrar Nuevo Abono</h3>
 
-                {/* Errores generales */}
-                {clientError && (
-                    <div className="mb-4 p-3 bg-red-100 rounded-md">
-                        <p className="text-red-600 text-sm">{clientError}</p>
-                    </div>
-                )}
+                    {/* Errores generales */}
+                    {clientError && (
+                        <div className="mb-4 p-3 bg-red-100 rounded-md">
+                            <p className="text-red-600 text-sm">{clientError}</p>
+                        </div>
+                    )}
 
-                <form onSubmit={handleSubmit}>
-                    {/* Selección de cliente */}
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Cliente:
-                        </label>
-                        {loadingClients ? (
-                            <div className="animate-pulse">
-                                <div className="h-9 bg-gray-200 rounded-md"></div>
+                    <form onSubmit={handleSubmit}>
+                        {/* Selección de cliente */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Cliente:
+                            </label>
+                            {loadingClients ? (
+                                <div className="animate-pulse">
+                                    <div className="h-9 bg-gray-200 rounded-md"></div>
+                                </div>
+                            ) : (
+                                <select
+                                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value={customerId}
+                                    onChange={(e) => setCustomerId(e.target.value)}
+                                    required
+                                    disabled={filteredCustomers.length === 0}
+                                >
+                                    <option value="">Seleccione un cliente</option>
+                                    {filteredCustomers.map((customer) => (
+                                        <option
+                                            key={customer.id}
+                                            value={customer.id}
+                                            className="flex justify-between"
+                                        >
+                                            {customer.nombre}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                            {filteredCustomers.length === 0 && !loadingClients && (
+                                <p className="mt-2 text-sm text-yellow-600">
+                                    No hay clientes con crédito disponible
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Información del crédito */}
+                        {loadingCredit && (
+                            <div className="mb-4 p-3 bg-gray-50 rounded-md animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                                <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                             </div>
-                        ) : (
+                        )}
+
+                        {creditError && (
+                            <div className="mb-4 p-3 bg-red-100 rounded-md">
+                                <p className="text-red-600 text-sm">{creditError}</p>
+                            </div>
+                        )}
+
+                        {creditData && (
+                            <div className="mb-4 p-3 bg-blue-50 rounded-md">
+                                <div className="grid grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <p className="font-medium">Límite:</p>
+                                        <p>${formatNumber(creditData.limite_credito)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="font-medium">Disponible:</p>
+                                        <p>${formatNumber(creditData.saldo_disponible)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="font-medium">Deuda:</p>
+                                        <p className="text-red-600">${formatNumber(creditData.deuda_total)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Método de pago */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Método de Pago:
+                            </label>
                             <select
                                 className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                value={customerId}
-                                onChange={(e) => setCustomerId(e.target.value)}
+                                value={paymentMethodId}
+                                onChange={(e) => setPaymentMethodId(e.target.value)}
                                 required
-                                disabled={filteredCustomers.length === 0}
                             >
-                                <option value="">Seleccione un cliente</option>
-                                {filteredCustomers.map((customer) => (
-                                    <option
-                                        key={customer.id}
-                                        value={customer.id}
-                                        className="flex justify-between"
-                                    >
-                                        {customer.nombre}
+                                <option value="">Seleccione un método</option>
+                                {paymentMethods.map((method) => (
+                                    <option key={method.id} value={method.id}>
+                                        {method.descripcion}
                                     </option>
                                 ))}
                             </select>
-                        )}
-                        {filteredCustomers.length === 0 && !loadingClients && (
-                            <p className="mt-2 text-sm text-yellow-600">
-                                No hay clientes con crédito disponible
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Información del crédito */}
-                    {loadingCredit && (
-                        <div className="mb-4 p-3 bg-gray-50 rounded-md animate-pulse">
-                            <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                            <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
-                            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                         </div>
-                    )}
 
-                    {creditError && (
-                        <div className="mb-4 p-3 bg-red-100 rounded-md">
-                            <p className="text-red-600 text-sm">{creditError}</p>
+                        {/* Monto */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Monto a abonar:
+                            </label>
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Ej. 1,500.00"
+                                value={formattedAmount}
+                                onChange={(e) => handleAmountChange(e.target.value)}
+                                onFocus={handleAmountFocus}
+                                onBlur={handleAmountBlur}
+                                ref={inputRef}
+                                required
+                            />
+                            {creditData && (
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Máximo permitido: {formatNumber(creditData.deuda_total)}
+                                </p>
+                            )}
                         </div>
-                    )}
 
-                    {creditData && (
-                        <div className="mb-4 p-3 bg-blue-50 rounded-md">
-                            <div className="grid grid-cols-3 gap-4 text-sm">
-                                <div>
-                                    <p className="font-medium">Límite:</p>
-                                    <p>${formatNumber(creditData.limite_credito)}</p>
-                                </div>
-                                <div>
-                                    <p className="font-medium">Disponible:</p>
-                                    <p>${formatNumber(creditData.saldo_disponible)}</p>
-                                </div>
-                                <div>
-                                    <p className="font-medium">Deuda:</p>
-                                    <p className="text-red-600">${formatNumber(creditData.deuda_total)}</p>
-                                </div>
-                            </div>
+                        {/* Botones */}
+                        <div className="flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+                                disabled={!!creditError || !creditData}
+                            >
+                                Registrar Abono
+                            </button>
                         </div>
-                    )}
-
-                    {/* Método de pago */}
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Método de Pago:
-                        </label>
-                        <select
-                            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            value={paymentMethodId}
-                            onChange={(e) => setPaymentMethodId(e.target.value)}
-                            required
-                        >
-                            <option value="">Seleccione un método</option>
-                            {paymentMethods.map((method) => (
-                                <option key={method.id} value={method.id}>
-                                    {method.descripcion}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Monto */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Monto a abonar:
-                        </label>
-                        <input
-                            type="text"
-                            inputMode="decimal"
-                            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Ej. 1,500.00"
-                            value={formattedAmount}
-                            onChange={(e) => handleAmountChange(e.target.value)}
-                            onFocus={handleAmountFocus}
-                            onBlur={handleAmountBlur}
-                            ref={inputRef}
-                            required
-                        />
-                        {creditData && (
-                            <p className="mt-1 text-sm text-gray-500">
-                                Máximo permitido: {formatNumber(creditData.deuda_total)}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Botones */}
-                    <div className="flex justify-end gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-                            disabled={!!creditError || !creditData}
-                        >
-                            Registrar Abono
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-        </div>
-    )
-);
+        )
+    );
 };
 
 export default NewPaymentModal;

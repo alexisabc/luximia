@@ -33,24 +33,24 @@ export function AuthProvider({ children }) {
     };
 
     useEffect(() => {
-        const initializeAuth = async () => {
-            try {
-                const savedUser = localStorage.getItem('luximia_user');
-                if (savedUser) {
-                    const parsedUser = JSON.parse(savedUser);
-                    // Opcional: Verificar con el backend si la sesión sigue activa
-                    setCurrentUser(parsedUser);
-                }
-            } catch (error) {
-                console.error('Error loading user session:', error);
-                logout();
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        initializeAuth();
-    }, []);
+  const initializeAuth = async () => {
+    try {
+      const savedUser = localStorage.getItem('luximia_user');
+      if (savedUser) {
+        const parsedUser = JSON.parse(savedUser);
+        // Agrega una validación de token con el backend aquí
+        const isValid = await axios.post('/api/validate-token', { token: parsedUser.token });
+        if (isValid) setCurrentUser(parsedUser);
+        else logout();
+      }
+    } catch (error) {
+      logout();
+    } finally {
+      setLoading(false); // Asegúrate de que loading cambie a false
+    }
+  };
+  initializeAuth();
+}, []);
 
     const login = async (usuario, contrasena) => {
         try {
