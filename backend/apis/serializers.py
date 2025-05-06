@@ -36,7 +36,17 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
     usuario = serializers.CharField()
-    contrasena = serializers.CharField()
+    contrasena = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        usuario = data.get('usuario')
+        contrasena = data.get('contrasena')
+
+        if not usuario or not contrasena:
+            raise serializers.ValidationError(
+                "Usuario y contraseña son requeridos")
+
+        return data
 
 
 

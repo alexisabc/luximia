@@ -5,6 +5,9 @@ from rest_framework import status
 from .models import *
 from .serializers import *
 from django.contrib.auth.hashers import check_password
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import permission_classes
 
 
 class VentaViewSet(viewsets.ModelViewSet):
@@ -24,26 +27,35 @@ class MetodoPagoVentaViewSet(viewsets.ModelViewSet):
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
-    serializer_class = UsuarioSerializer  # <-- Este debe estar dentro de la clase
+    serializer_class = UsuarioSerializer
 
     @action(detail=False, methods=['POST'], url_path='login')
-    def login(self, request):  # <-- Asegúrate de que esté indentado correctamente
+    @permission_classes([AllowAny])
+    def login(self, request):
         serializer = LoginSerializer(data=request.data)
         if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = Usuario.objects.get(
                 usuario=serializer.validated_data['usuario'])
+
             if not check_password(serializer.validated_data['contrasena'], user.contrasena):
-                return Response({"detail": "Contraseña incorrecta"}, status=400)
+                return Response({"detail": "Contraseña incorrecta"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Generar tokens JWT
+            refresh = RefreshToken.for_user(user)
 
             return Response({
                 "user": UsuarioSerializer(user).data,
-                "message": "Login exitoso"
-            })
+                "tokens": {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                }
+            }, status=status.HTTP_200_OK)
+
         except Usuario.DoesNotExist:
-            return Response({"detail": "Usuario no encontrado"}, status=404)
+            return Response({"detail": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ArticuloViewSet(viewsets.ModelViewSet):

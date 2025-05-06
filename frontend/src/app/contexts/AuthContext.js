@@ -1,111 +1,124 @@
-"use client";
+'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import axios from 'axios';
+import { createContext, useContext, useEffect, useState } from 'react'
+import axios from 'axios'
 
-const AuthContext = createContext();
+const AuthContext = createContext({
+    currentUser: null,
+    login: () => { },
+    logout: () => { },
+    loading: true,
+    authError: null,
+    hasRole: () => false,
+    hasPermission: () => false
+})
 
 export function AuthProvider({ children }) {
-    const [currentUser, setCurrentUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [authError, setAuthError] = useState(null);
+    const [currentUser, setCurrentUser] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [authError, setAuthError] = useState(null)
 
-    // Función para verificar roles
     const hasRole = (requiredRoles) => {
-        if (!currentUser) return false;
-        if (!requiredRoles || requiredRoles.length === 0) return true;
-        return requiredRoles.includes(currentUser.rol);
-    };
+        if (!currentUser?.rol) return false
+        return requiredRoles.includes(currentUser.rol)
+    }
 
-    // Función para verificar permisos específicos (puedes expandir esto)
     const hasPermission = (permission) => {
-        // Aquí puedes implementar lógica más compleja basada en el rol
-        if (!currentUser) return false;
-
-        // Ejemplo básico:
         const rolePermissions = {
             admin: ['manage_users', 'view_reports', 'edit_content'],
             manager: ['view_reports', 'edit_content'],
             user: ['view_content']
-        };
-
-        return rolePermissions[currentUser.rol]?.includes(permission) || false;
-    };
+        }
+        return rolePermissions[currentUser?.rol]?.includes(permission) || false
+    }
 
     useEffect(() => {
-  const initializeAuth = async () => {
-    try {
-      const savedUser = localStorage.getItem('luximia_user');
-      if (savedUser) {
-        const parsedUser = JSON.parse(savedUser);
-        // Agrega una validación de token con el backend aquí
-        const isValid = await axios.post('/api/validate-token', { token: parsedUser.token });
-        if (isValid) setCurrentUser(parsedUser);
-        else logout();
-      }
-    } catch (error) {
-      logout();
-    } finally {
-      setLoading(false); // Asegúrate de que loading cambie a false
-    }
-  };
-  initializeAuth();
-}, []);
+        const initializeAuth = async () => {
+            if (typeof window === 'undefined') return
+
+            try {
+                const savedUser = localStorage.getItem('luximia_user')
+                if (savedUser) {
+                    const parsedUser = JSON.parse(savedUser)
+                    const { data } = await axios.post(
+                        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/token/verify/`,
+                        { token: parsedUser.token }
+                    )
+                    if (data.valid) setCurrentUser(parsedUser)
+                    else logout()
+                }
+            } catch (error) {
+                console.error('Auth initialization error:', error)
+                logout()
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        initializeAuth()
+    }, [])
 
     const login = async (usuario, contrasena) => {
         try {
-            const response = await axios.post(
+            const { data } = await axios.post(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/usuarios/login/`,
                 { usuario, contrasena },
                 {
                     headers: {
-                        'Content-Type': 'application/json',  // Añadir headers explícitos
+                        'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     }
                 }
-            );
+            )
 
-            if (response.data.user) {
+            if (data.user) {
                 const userData = {
-                    id: response.data.user.id,
-                    nombre: response.data.user.nombre,
-                    usuario: response.data.user.usuario,
-                    rol: response.data.user.rol,
-                    // Agrega más campos si es necesario
-                };
+                    id: data.user.id,
+                    nombre: data.user.nombre,
+                    usuario: data.user.usuario,
+                    rol: data.user.rol,
+                    token: data.token // Asegúrate de recibir el token del backend
+                }
 
-                localStorage.setItem('luximia_user', JSON.stringify(userData));
-                setCurrentUser(userData);
-                setAuthError(null);
-                return true;
+                localStorage.setItem('luximia_user', JSON.stringify(userData))
+                setCurrentUser(userData)
+                setAuthError(null)
+                return true
             }
-            return false;
+            return false
         } catch (error) {
-            console.error('Login error:', error);
-            setAuthError(error.response?.data?.detail || 'Error de autenticación');
-            throw error;
+            setAuthError(error.response?.data?.detail || 'Error de autenticación')
+            throw error
         }
-    };
+    }
 
     const logout = () => {
-        localStorage.removeItem('luximia_user');
-        setCurrentUser(null);
-        // Opcional: Hacer llamada al backend para invalidar la sesión
-    };
+        localStorage.removeItem('luximia_user')
+        setCurrentUser(null)
+        // Opcional: Llamar a API de logout
+    }
 
     return (
-        <AuthContext.Provider value={{
-            currentUser,
-            login,
-            logout,
-            loading,
-            authError,
-            hasRole,
-            hasPermission
-        }}>
-            {children}
+        <AuthContext.Provider
+            value={{
+                currentUser,
+                login,
+                logout,
+                loading,
+                authError,
+                hasRole,
+                hasPermission
+            }}
+        >
+            {!loading && children}
         </AuthContext.Provider>
-    );
+    )
 }
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    const context = useContext(AuthContext)
+    if (!context) {
+        throw new Error('useAuth debe usarse dentro de un AuthProvider')
+    }
+    return context
+}

@@ -16,8 +16,8 @@
   "author": "Alexis A.B.C.",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "electron": "^31.7.7",
+    "concurrently": "^9.1.2",
+    "electron": "^36.1.0",
     "electron-builder": "^26.0.12",
     "electron-serve": "^2.1.1"
   },
