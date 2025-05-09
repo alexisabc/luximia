@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Swal from 'sweetalert2'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')

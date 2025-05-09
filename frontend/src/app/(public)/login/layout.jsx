@@ -1,8 +1,10 @@
 'use client'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import Image from 'next/image'
+
+
 
 export default function PublicLayout({ children }) {
   const { currentUser, loading } = useAuth()
